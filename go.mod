@@ -1,4 +1,4 @@
-module github.com/makenew/benthos-plugin/v2
+module github.com/alecmerdler/spicedb-benthos-plugin/v2
 
 go 1.19
 
