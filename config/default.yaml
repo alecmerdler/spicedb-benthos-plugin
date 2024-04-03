@@ -1,15 +1,10 @@
 ---
 input:
-  http_server: {}
-
-pipeline:
-  processors:
-    - bloblang: |
-        root.body = "{\"data\":\"TODO\"}".todo()
-        root.statusCode = 200
-
-logger:
-  level: ${LOG_LEVEL:info}
-  static_fields:
-    functionName: ${AWS_LAMBDA_FUNCTION_NAME:''}
-    version: ${LOG_VERSION:''}
+  spicedb:
+    endpoint: localhost:50051
+    token: mysecretkey
+    filter:
+      resource_type: redrock/user
+output:
+  stdout:
+    codec: lines

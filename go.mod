@@ -6,6 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/authzed/authzed-go v0.11.1
+	github.com/authzed/grpcutil v0.0.0-20230908193239-4286bb1d6403
 	github.com/benthosdev/benthos/v4 v4.26.0
 )
 
@@ -99,6 +100,7 @@ require (
 	github.com/bwmarrin/discordgo v0.27.1 // indirect
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
+	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
@@ -242,6 +244,7 @@ require (
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/sftp v1.13.6 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.46.0 // indirect
@@ -269,6 +272,7 @@ require (
 	github.com/snowflakedb/gosnowflake v1.7.2 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/tetratelabs/wazero v1.6.0 // indirect
 	github.com/tilinna/z85 v1.0.0 // indirect
 	github.com/trinodb/trino-go-client v0.313.0 // indirect
