@@ -1,0 +1,20 @@
+input:
+  spicedb:
+    endpoint: localhost:50051
+    token: mysecretkey
+    filter:
+      resource_type: ""
+      resource_id: ""
+      relation: ""
+      subject_type: ""
+      subject_id: ""
+      subject_relation: ""
+output:
+  nats:
+    urls:
+      - nats://localhost:4222
+    subject: relationships.${}
+    headers: {}
+    metadata:
+      include_prefixes: []
+      include_patterns: []

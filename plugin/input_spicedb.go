@@ -33,12 +33,15 @@ type spiceDBInput struct {
 	consistency *authzedv1.Consistency
 	limit       uint32
 	filter      *authzedv1.RelationshipFilter
+	watch       bool
 
 	client              *authzed.Client
 	dbMut               sync.Mutex
 	relationshipsClient authzedv1.PermissionsService_ReadRelationshipsClient
+	watchClient         authzedv1.WatchService_WatchClient
 
 	// TODO(alecmerdler): Store the cursor returned by the API on disk for resuming after restarts...
+	cursor *authzedv1.Cursor
 
 	res    *service.Resources
 	logger *service.Logger
@@ -114,11 +117,14 @@ func newSpiceDBInputFromConfig(conf *service.ParsedConfig, res *service.Resource
 		}
 	}
 
+	watch, _ := conf.FieldBool("watch")
+
 	return &spiceDBInput{
 		consistency: consistency,
 		limit:       limit,
 		filter:      filter,
 		client:      client,
+		watch:       watch,
 		res:         res,
 		logger:      res.Logger(),
 	}, nil
@@ -168,6 +174,10 @@ func spiceDBInputConfig() *service.ConfigSpec {
 					Optional(),
 			).
 				Description("Only relationships matching this filter will be yielded."),
+			service.NewBoolField("watch").
+				Description("Continue watching for relationship updates after reading the snapshot").
+				Default(false).
+				Advanced(),
 		)
 }
 
@@ -204,7 +214,24 @@ func (i *spiceDBInput) Connect(ctx context.Context) (err error) {
 		return fmt.Errorf("failed to connect: %w", err)
 	}
 
+	var cursor *authzedv1.ZedToken
+	if token := i.consistency.GetAtExactSnapshot(); token != nil {
+		cursor = token
+	} else if token := i.consistency.GetAtLeastAsFresh(); token != nil {
+		cursor = token
+	}
+
+	watchClient, err := i.client.Watch(ctx, &authzedv1.WatchRequest{
+		OptionalObjectTypes:         []string{i.filter.ResourceType},
+		OptionalRelationshipFilters: []*authzedv1.RelationshipFilter{i.filter},
+		OptionalStartCursor:         cursor,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to connect: %w", err)
+	}
+
 	i.relationshipsClient = relationshipsClient
+	i.watchClient = watchClient
 	return
 }
 
@@ -221,20 +248,36 @@ func (i *spiceDBInput) Read(ctx context.Context) (*service.Message, service.AckF
 	if err != nil {
 		if errors.Is(err, io.EOF) {
 			err = service.ErrEndOfInput
+
+			// FIXME(alecmerdler): Start reading off of the Watch API once the ReadRelationships API is exhausted...
 		}
 
 		_ = relationshipsClient.CloseSend()
 		return nil, nil, err
 	}
 
-	jsonBytes, err := json.Marshal(res)
+	// FIXME(alecmerdler): Watch responses come with a list of relationship updates, need to spread these across `Read()` calls...
+
+	update := &authzedv1.RelationshipUpdate{
+		Relationship: res.Relationship,
+		Operation:    authzedv1.RelationshipUpdate_OPERATION_CREATE,
+	}
+	jsonBytes, err := json.Marshal(update)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to marshal response to JSON: %w", err)
 	}
 
 	msg := service.NewMessage(jsonBytes)
+	// TODO(alecmerdler): Determine metadata fields that should we expose (https://www.benthos.dev/docs/configuration/metadata)...
+	// msg.MetaSet()
+
 	return msg, func(ctx context.Context, err error) (cErr error) {
 		// TODO(alecmerdler): Persist `res.AfterResultCursor` to disk for resuming after restarts...
+		if err != nil {
+			// FIXME(alecmerdler): Resend the message on the next `Read()` call...
+		}
+
+		i.cursor = res.AfterResultCursor
 		return
 	}, nil
 }
