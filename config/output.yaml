@@ -1,0 +1,20 @@
+---
+input:
+  generate:
+    count: 10
+    interval: ""
+    mapping: |
+      root.operation = 1
+      root.relationship.resource.objectType = "document"
+      root.relationship.resource.objectId = "something"
+      root.relationship.relation = "viewer"
+      root.relationship.subject.object.objectType = "user"
+      root.relationship.subject.object.objectId = "something"
+# FIXME(alecmerdler): For debugging...
+# output:
+#   stdout:
+#     codec: lines
+output:
+  spicedb:
+    endpoint: localhost:50051
+    token: mysecretkey

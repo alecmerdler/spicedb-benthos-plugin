@@ -8,6 +8,7 @@ require (
 	github.com/authzed/authzed-go v0.11.1
 	github.com/authzed/grpcutil v0.0.0-20230908193239-4286bb1d6403
 	github.com/benthosdev/benthos/v4 v4.26.0
+	google.golang.org/grpc v1.62.1
 )
 
 require (
@@ -327,7 +328,6 @@ require (
 	google.golang.org/genproto v0.0.0-20240125205218-1f4bbc51befe // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240205150955-31a09d347014 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240205150955-31a09d347014 // indirect
-	google.golang.org/grpc v1.62.1 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/jcmturner/aescts.v1 v1.0.1 // indirect
