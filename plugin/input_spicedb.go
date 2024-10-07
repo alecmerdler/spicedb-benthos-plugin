@@ -25,9 +25,7 @@ const (
 	consistencyOptionMinimizeLatency consistencyOption = "MinimizeLatency"
 )
 
-var (
-	sampleString = `{}`
-)
+var sampleString = `{}`
 
 type spiceDBInput struct {
 	consistency *authzedv1.Consistency
@@ -83,6 +81,8 @@ func newSpiceDBInputFromConfig(conf *service.ParsedConfig, res *service.Resource
 		limit = uint32(configLimit)
 	}
 
+	var filter *authzedv1.RelationshipFilter
+
 	filterConfig := conf.Namespace("filter")
 	resourceType, err := filterConfig.FieldString("resource_type")
 	if err != nil {
@@ -91,16 +91,16 @@ func newSpiceDBInputFromConfig(conf *service.ParsedConfig, res *service.Resource
 
 	resourceID, _ := filterConfig.FieldString("resource_id")
 	relation, _ := filterConfig.FieldString("relation")
-	subjectType, _ := filterConfig.FieldString("subject_type")
-	subjectID, _ := filterConfig.FieldString("subject_id")
-	subjectRelation, _ := filterConfig.FieldString("subject_relation")
 
-	filter := &authzedv1.RelationshipFilter{
+	filter = &authzedv1.RelationshipFilter{
 		ResourceType:       resourceType,
 		OptionalResourceId: resourceID,
 		OptionalRelation:   relation,
 	}
 
+	subjectType, _ := filterConfig.FieldString("subject_type")
+	subjectID, _ := filterConfig.FieldString("subject_id")
+	subjectRelation, _ := filterConfig.FieldString("subject_relation")
 	if subjectType != "" {
 		filter.OptionalSubjectFilter = &authzedv1.SubjectFilter{
 			SubjectType:       subjectType,
@@ -181,7 +181,6 @@ func init() {
 			}
 			return service.AutoRetryNacks(i), nil
 		})
-
 	if err != nil {
 		panic(err)
 	}
@@ -196,8 +195,8 @@ func (i *spiceDBInput) Connect(ctx context.Context) (err error) {
 	}
 
 	relationshipsClient, err := i.client.ReadRelationships(ctx, &authzedv1.ReadRelationshipsRequest{
-		Consistency:        i.consistency,
 		RelationshipFilter: i.filter,
+		Consistency:        i.consistency,
 		OptionalLimit:      i.limit,
 	})
 	if err != nil {

@@ -4,7 +4,16 @@ input:
     endpoint: localhost:50051
     token: mysecretkey
     filter:
-      resource_type: redrock/user
+      resource_type: redrock/proj
+pipeline:
+  processors:
+    - bloblang: |
+        root.resource_type = this.relationship.resource.object_type
+        root.resource_id = this.relationship.resource.object_id
+        root.relation = this.relationship.relation
+        root.subject_type = this.relationship.subject.object.object_type
+        root.subject_id = this.relationship.subject.object.object_id
 output:
-  stdout:
-    codec: lines
+  nats:
+    urls: ["nats://localhost:4222"]
+    subject: 'spicedb.relationships.${! json("resource_type") }.${! json("resource_id") }.${! json("relation") }.${! json("subject_type") }.${! json("subject_id") }'
